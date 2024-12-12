@@ -1,0 +1,1 @@
+https://www.kaggle.com/datasets/andrewmvd/brazilian-stock-market?select=bovespa_stocks.csv
