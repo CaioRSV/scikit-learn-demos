@@ -52,7 +52,7 @@ if(showData):
     plt.tight_layout()
     plt.show()
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.015)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
 
 ## Model Training
 
@@ -85,18 +85,5 @@ print(len(
     y.tolist()
 ))
 
-X_single = X[['DateDist']] 
-
-X_train, X_test, y_train, y_test = train_test_split(X_single, y, test_size=0.2)
-pipeline.fit(X_train, y_train)
-
-X_sorted = X_single.sort_values(by='DateDist')
-y_pred_line = pipeline.predict(X_sorted)
-
-plt.scatter(X_single, y, color='black', alpha=0.5, label='Actual')
-plt.plot(X_sorted, y_pred_line, color='blue', linewidth=2, label='Regression Line')
-plt.xlabel('Date Distance (DateDist)')
-plt.ylabel('Adjusted Close Price (Adj Close)')
-plt.legend()
-plt.title("Linear Regression: Single Feature")
-plt.show()
+## Plot
+# tbf
