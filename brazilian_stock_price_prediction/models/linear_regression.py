@@ -2,7 +2,7 @@
 file_name = 'bovespa_indexes.csv'
 showData = False # Show the Plotted Data (Matplotlib)
 logs = False # Show Processing Step Logs
-univariant = False
+univariant = True # Only plots at the end if Univariant
 trainingFeature = 'DateDist' # (univariant) DateDist, High, Low, Open, Volume
 # High, Low and Open are deceivingly accurate, because of high semantic relation to the target class
 # *DateDist is the distance (days) from the first registered date in the dataset
@@ -73,7 +73,7 @@ pipeline.fit(X_train, y_train)
 y_pred = pipeline.predict(X_test[:evaluationSampleSize])
 modelAccuracy = pipeline.score(X_test, y_test)
 
-print(f"Model Evaluation ({'Univariant' if univariant else 'Multivariant'} {'['+trainingFeature+']' if univariant else ''})")
+print(f"Model Evaluation ({'Univariant' if univariant else 'Multivariant'}{' ['+trainingFeature+']' if univariant else ''})")
 print(f"Accuracy: {modelAccuracy}")
 
 ## Plot 
@@ -96,4 +96,4 @@ plt.xlabel(f"Training Feature ({trainingFeature})")
 plt.ylabel('Adjusted Close Price (Adj Close)')
 plt.legend()
 plt.title("Linear Regression: Single Feature")
-plt.show()
+univariant and plt.show()
