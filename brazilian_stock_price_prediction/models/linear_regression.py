@@ -2,6 +2,11 @@
 file_name = 'bovespa_indexes.csv'
 showData = False # Show the Plotted Data (Matplotlib)
 logs = False # Show Processing Step Logs
+univariant = False
+trainingFeature = 'DateDist' # (univariant) DateDist, High, Low, Open, Volume
+# High, Low and Open are deceivingly accurate, because of high semantic relation to the target class
+# *DateDist is the distance (days) from the first registered date in the dataset
+testFraction = 0.2 # Recommended: 0.2 | Innacuracy value demonstration: 0.999
 
 evaluationSampleSize = 30
 
@@ -43,7 +48,7 @@ bi['Symbol'] = bi['Symbol'].map(symbolMapping)
 
 ## Feature Separation
 y = bi['Adj Close'] # Target Value: Adj Close
-X = bi.drop(columns=['Adj Close', 'Close', 'Date']) # Features: Rest 
+X = bi.drop(columns=['Adj Close', 'Close', 'Date', 'High', 'Low', 'Open']) if not univariant else bi[[trainingFeature]] # Features: Rest 
 # (Date overwritten by DateDist, Close removed because of intrinsic relation with Adj Close)
 
 ## Data Visualization
@@ -52,9 +57,9 @@ if(showData):
     plt.tight_layout()
     plt.show()
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
-
 ## Model Training
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = testFraction)
 
 pipeline = Pipeline([
     ('scaler', StandardScaler()),
@@ -68,22 +73,27 @@ pipeline.fit(X_train, y_train)
 y_pred = pipeline.predict(X_test[:evaluationSampleSize])
 modelAccuracy = pipeline.score(X_test, y_test)
 
+print(f"Model Evaluation ({'Univariant' if univariant else 'Multivariant'} {'['+trainingFeature+']' if univariant else ''})")
 print(f"Accuracy: {modelAccuracy}")
-print("---")
 
-pred = pipeline.predict(X_test[:evaluationSampleSize])
-print(f"Predicted Class:")
-print(pred)
-print("Real class")
-print(y_test[:evaluationSampleSize])
+## Plot 
 
+Xt_sorted = X_test.sort_values(by=trainingFeature)
+yt_pred = pipeline.predict(Xt_sorted)
 
-print(len(
-    X['DateDist'].tolist()
-));
-print(len(
-    y.tolist()
-))
+X_ScatterHandler = X_test if univariant else X_test.iloc[:,0:1]
 
-## Plot
-# tbf
+# Handle the case when univariant is False and you want to plot the selected feature
+if univariant:
+    X_ScatterHandler = X_test[[trainingFeature]]  # Keep the single feature for plotting
+else:
+    X_ScatterHandler = X_test[[trainingFeature]]  # Use the specified feature for the x-axis
+
+# Plot
+plt.scatter(X_ScatterHandler, y_test, color='black', alpha=0.5, label='Actual')
+plt.plot(Xt_sorted[[trainingFeature]], yt_pred, color='blue', linewidth=2, label='Regression Line')
+plt.xlabel(f"Training Feature ({trainingFeature})")
+plt.ylabel('Adjusted Close Price (Adj Close)')
+plt.legend()
+plt.title("Linear Regression: Single Feature")
+plt.show()
